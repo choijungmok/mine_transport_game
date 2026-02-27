@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⛏️ 광산 경영 시뮬레이션 게임</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Common Styles */
+        .dashboard {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 10px;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-info {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-small {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border-left: 4px solid #17a2b8;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            color: #856404;
+            border-left: 4px solid #ffc107;
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            color: #721c24;
+            border-left: 4px solid #dc3545;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border-left: 4px solid #28a745;
+        }
+
+        /* Start Screen */
+        .start-screen {
+            max-width: 600px;
+            margin: 50px auto;
+            display: block;
+        }
+
+        .start-screen h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .game-info {
+            background: #fff3cd;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid #ffc107;
+            margin-top: 20px;
+        }
+
+        .game-info h3 {
+            color: #856404;
+            margin-bottom: 15px;
+        }
+
+        .game-info ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .game-info li {
+            padding: 8px 0;
+            color: #856404;
+            line-height: 1.6;
+        }
+
+        /* Game Screen */
+        .game-screen {
+            display: none;
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .dashboard-title h1 {
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-card.warning {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .stat-card.success {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .stat-card.custom {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            color: #333;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        .progress-bar {
+            background: #e9ecef;
+            border-radius: 10px;
+            height: 30px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            height: 100%;
+            transition: width 0.5s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 0.85em;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn-nav {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-nav.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-nav:not(.active) {
+            background: #e9ecef;
+            color: #495057;
+        }
+
+        .btn-nav:hover {
+            transform: translateY(-2px);
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+
+        .card h2 {
+            color: #333;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .card h3 {
+            color: #555;
+            margin-bottom: 15px;
+            margin-top: 20px;
+        }
+
+        .worker-list, .ship-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .worker-item, .ship-item {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid #667eea;
+        }
+
+        .worker-item h4, .ship-item h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .worker-info, .ship-info {
+            font-size: 0.95em;
+            color: #666;
+            line-height: 1.8;
+        }
+
+        .worker-info p, .ship-info p {
+            margin: 5px 0;
+        }
+
+        .worker-actions, .ship-actions {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        /* Result Screen */
+        .result-screen {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .result-screen h1 {
+            font-size: 3em;
+            margin-bottom: 20px;
+        }
+
+        .result-screen.success h1 {
+            color: #28a745;
+        }
+
+        .result-screen.failed h1 {
+            color: #dc3545;
+        }
+
+        .result-stats {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 30px;
+            margin: 30px auto;
+            text-align: left;
+            max-width: 600px;
+        }
+
+        .result-stats h2 {
+            text-align: center;
+            margin-bottom: 25px;
+            color: #333;
+        }
+
+        .result-stats p {
+            font-size: 1.2em;
+            margin: 15px 0;
+            color: #555;
+        }
+
+        /* Animations */
+        @keyframes slideIn {
+            from { transform: translateX(400px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(400px); opacity: 0; }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .dashboard {
+                padding: 20px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .worker-list, .ship-list {
+                grid-template-columns: 1fr;
+            }
+
+            .start-screen {
+                margin: 20px auto;
+                padding: 0 10px;
+            }
+
+            .start-screen h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 시작 화면 -->
+        <div id="startScreen" class="start-screen">
+            <div class="dashboard">
+                <h1>⛏️ 광산 경영 시뮬레이션</h1>
+                <p class="subtitle">당신은 광산의 주인입니다. 노동자를 고용하고 배를 관리하여 부를 축적하세요!</p>
+                
+                <div class="form-group">
+                    <label for="playerName">플레이어 이름</label>
+                    <input type="text" id="playerName" placeholder="이름을 입력하세요" maxlength="20">
+                </div>
+                
+                <div class="form-group">
+                    <label for="targetGold">목표 금액 (골드)</label>
+                    <input type="number" id="targetGold" value="10000000" min="1000000" step="1000000">
+                </div>
+                
+                <button class="btn btn-primary" onclick="startGame()">새 게임 시작</button>
+                
+                <div class="game-info">
+                    <h3>게임 규칙</h3>
+                    <ul>
+                        <li>💰 <strong>성공 조건:</strong> 목표 금액을 달성하면 승리!</li>
+                        <li>💸 <strong>실패 조건:</strong> 운영비가 0 이하가 되면 파산!</li>
+                        <li>⛏️ 노동자 레벨이 높을수록 더 많이 채굴하지만 유지비도 증가</li>
+                        <li>🚢 배의 종류와 선장에 따라 수익이 크게 달라짐</li>
+                        <li>📅 매월 어음이 도착할 때까지 자금을 관리해야 함</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- 게임 화면 -->
+        <div id="gameScreen" class="game-screen">
+            <!-- 대시보드 헤더 -->
+            <div class="dashboard">
+                <div class="dashboard-header">
+                    <div class="dashboard-title">
+                        <h1>⛏️ <span id="displayPlayerName">플레이어</span>의 광산</h1>
+                        <p>현명한 결정으로 부를 축적하세요!</p>
+                    </div>
+                    <button class="btn btn-secondary" onclick="goToStart()">🏠 처음으로</button>
+                </div>
+                
+                <!-- 알림 영역 -->
+                <div id="alertContainer"></div>
+                
+                <!-- 통계 카드 -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">💰 보유 자금</div>
+                        <div class="stat-value"><span id="currentGold">0</span> G</div>
+                    </div>
+                    <div class="stat-card success">
+                        <div class="stat-label">🎯 목표 금액</div>
+                        <div class="stat-value"><span id="targetGoldDisplay">0</span> G</div>
+                    </div>
+                    <div class="stat-card warning">
+                        <div class="stat-label">📅 경과 월수</div>
+                        <div class="stat-value"><span id="gameMonth">0</span> 개월</div>
+                    </div>
+                </div>
+                
+                <!-- 진행률 바 -->
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressBar" style="width: 0%">0%</div>
+                </div>
+                
+                <!-- 추가 통계 -->
+                <div class="stats-grid">
+                    <div class="stat-card custom">
+                        <div class="stat-label">⛏️ 보관 중인 광물</div>
+                        <div class="stat-value"><span id="oreStorage">0</span></div>
+                    </div>
+                    <div class="stat-card custom">
+                        <div class="stat-label">📈 일일 채굴량</div>
+                        <div class="stat-value"><span id="dailyMining">0</span></div>
+                    </div>
+                    <div class="stat-card custom">
+                        <div class="stat-label">💸 월 유지비</div>
+                        <div class="stat-value"><span id="monthlyMaintenance">0</span> G</div>
+                    </div>
+                </div>
+                
+                <!-- 시간 진행 버튼 -->
+                <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px;">
+                    <button class="btn btn-info" onclick="advanceTime(1)" style="flex: 1; min-width: 120px;">⏩ 1일 진행</button>
+                    <button class="btn btn-info" onclick="advanceTime(7)" style="flex: 1; min-width: 120px;">⏩ 7일 진행</button>
+                    <button class="btn btn-info" onclick="advanceTime(30)" style="flex: 1; min-width: 120px;">⏩ 30일 진행</button>
+                </div>
+            </div>
+            
+            <!-- 네비게이션 -->
+            <div class="dashboard">
+                <div class="nav-buttons">
+                    <button class="btn-nav active" onclick="showSection('mine')">⛏️ 광산 관리</button>
+                    <button class="btn-nav" onclick="showSection('ship')">🚢 선박 관리</button>
+                </div>
+            </div>
+            
+            <!-- 광산 섹션 -->
+            <div id="mineSection" class="section active">
+                <div class="card">
+                    <h2>⛏️ 광산 관리</h2>
+                    
+                    <div class="alert alert-info">
+                        <strong>💡 팁:</strong> 노동자 레벨이 높을수록 채굴량이 많지만 유지비도 증가합니다. 수익과 비용의 균형을 맞추세요!
+                    </div>
+                    
+                    <h3>고용된 노동자</h3>
+                    <div id="workerList" class="worker-list">
+                        <p class="alert alert-info">노동자를 고용하세요!</p>
+                    </div>
+                    
+                    <button class="btn btn-primary" onclick="showHireWorkerModal()">👷 새 노동자 고용</button>
+                </div>
+            </div>
+            
+            <!-- 선박 섹션 -->
+            <div id="shipSection" class="section">
+                <div class="card">
+                    <h2>🚢 선박 관리</h2>
+                    
+                    <div class="alert alert-info">
+                        <strong>💡 팁:</strong> 선박의 수수료와 선장의 능력에 따라 최종 수익이 크게 달라집니다. 신중하게 선택하세요!
+                    </div>
+                    
+                    <h3>보유 선박</h3>
+                    <div id="shipList" class="ship-list">
+                        <p class="alert alert-info">선박을 구매하세요!</p>
+                    </div>
+                    
+                    <button class="btn btn-primary" onclick="showBuyShipModal()">🛒 새 선박 구매</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 결과 화면 -->
+        <div id="resultScreen" class="result-screen">
+            <div class="dashboard">
+                <div id="resultContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ========== 게임 상수 ==========
+        const GAME_CONFIG = {
+            INITIAL_GOLD: 500000,
+            INITIAL_ORE: 0,
+            INITIAL_MINE_LEVEL: 1,
+            DEFAULT_TARGET: 10000000,
+            DAYS_PER_MONTH: 30,
+            
+            WORKER_TYPES: [
+                { level: 1, name: '견습생', mining_rate: 10, cost: 5000 },
+                { level: 2, name: '숙련공', mining_rate: 25, cost: 15000 },
+                { level: 3, name: '전문가', mining_rate: 50, cost: 35000 },
+                { level: 4, name: '마스터', mining_rate: 100, cost: 75000 },
+                { level: 5, name: '레전드', mining_rate: 200, cost: 150000 }
+            ],
+            
+            SHIP_TYPES: [
+                { type: '소형 상선', capacity: 1000, speed_days: 60, commission: 5 },
+                { type: '중형 상선', capacity: 3000, speed_days: 50, commission: 8 },
+                { type: '대형 상선', capacity: 5000, speed_days: 45, commission: 10 },
+                { type: '군함', capacity: 2000, speed_days: 30, commission: 20 },
+                { type: '고속선', capacity: 1500, speed_days: 25, commission: 15 }
+            ],
+            
+            CAPTAIN_TYPES: [
+                { name: '성실한 존', morality: 9, luck: 7, loss_rate: 2 },
+                { name: '행운의 메리', morality: 7, luck: 10, loss_rate: 3 },
+                { name: '평범한 톰', morality: 6, luck: 6, loss_rate: 8 },
+                { name: '욕심쟁이 잭', morality: 3, luck: 5, loss_rate: 15 },
+                { name: '베테랑 샘', morality: 8, luck: 8, loss_rate: 4 }
+            ],
+            
+            ORE_BASE_PRICE: 100,
+            PRICE_VARIANCE: 0.3
+        };
+
+        // ========== 게임 상태 클래스 ==========
+        class GameState {
+            constructor() {
+                this.playerName = '';
+                this.currentGold = GAME_CONFIG.INITIAL_GOLD;
+                this.targetGold = GAME_CONFIG.DEFAULT_TARGET;
+                this.mineLevel = GAME_CONFIG.INITIAL_MINE_LEVEL;
+                this.oreStorage = GAME_CONFIG.INITIAL_ORE;
+                this.gameMonth = 1;
+                this.gameDay = 1;
+                this.gameStatus = 'playing';
+                this.workers = [];
+                this.ships = [];
+            }
+            
+            getMonthlyMaintenance() {
+                return this.workers.reduce((sum, w) => sum + (w.maintenance_cost * w.count), 0);
+            }
+            
+            getDailyMining() {
+                return this.workers.reduce((sum, w) => sum + (w.mining_rate * w.count), 0);
+            }
+            
+            advanceDay() {
+                this.oreStorage += this.getDailyMining();
+                this.gameDay++;
+                
+                if (this.gameDay % GAME_CONFIG.DAYS_PER_MONTH === 0) {
+                    this.advanceMonth();
+                }
+                
+                this.checkShipArrivals();
+            }
+            
+            advanceMonth() {
+                this.gameMonth++;
+                const maintenance = this.getMonthlyMaintenance();
+                this.currentGold -= maintenance;
+                
+                if (this.currentGold <= 0) {
+                    this.gameStatus = 'failed';
+                }
+            }
+            
+            checkShipArrivals() {
+                this.ships.forEach(ship => {
+                    if (ship.status === 'sailing' && this.gameDay >= ship.arrival_date) {
+                        this.processShipArrival(ship);
+                    }
+                });
+            }
+            
+            processShipArrival(ship) {
+                const lossRate = ship.loss_rate / 100;
+                const actualOre = ship.ore_loaded * (1 - lossRate);
+                const priceVariation = 1 + (Math.random() - 0.5) * 2 * GAME_CONFIG.PRICE_VARIANCE;
+                const orePrice = GAME_CONFIG.ORE_BASE_PRICE * priceVariation;
+                const grossRevenue = actualOre * orePrice;
+                const commission = grossRevenue * (ship.commission_rate / 100);
+                const netRevenue = grossRevenue - commission;
+                
+                this.currentGold += netRevenue;
+                
+                ship.status = 'docked';
+                ship.ore_loaded = 0;
+                ship.departure_date = 0;
+                ship.arrival_date = 0;
+                
+                showNotification(`🚢 ${ship.ship_type} 도착! 순수익: ${formatNumber(Math.floor(netRevenue))} 골드`, 'success');
+                
+                // 승리 조건 체크
+                if (this.currentGold >= this.targetGold) {
+                    this.gameStatus = 'success';
+                    console.log('목표 달성! 게임 승리!');
+                }
+            }
+            
+            hireWorker(level) {
+                const workerType = GAME_CONFIG.WORKER_TYPES.find(w => w.level === level);
+                if (!workerType) return false;
+                
+                if (this.currentGold < workerType.cost) {
+                    showNotification('자금이 부족합니다!', 'danger');
+                    return false;
+                }
+                
+                const existingWorker = this.workers.find(w => w.worker_level === level);
+                if (existingWorker) {
+                    existingWorker.count++;
+                } else {
+                    this.workers.push({
+                        worker_level: level,
+                        worker_name: workerType.name,
+                        count: 1,
+                        mining_rate: workerType.mining_rate,
+                        maintenance_cost: workerType.cost
+                    });
+                }
+                
+                this.currentGold -= workerType.cost;
+                showNotification(`${workerType.name} 고용 완료!`, 'success');
+                return true;
+            }
+            
+            fireWorker(level) {
+                const worker = this.workers.find(w => w.worker_level === level);
+                if (!worker) return false;
+                
+                if (worker.count > 1) {
+                    worker.count--;
+                } else {
+                    this.workers = this.workers.filter(w => w.worker_level !== level);
+                }
+                
+                const workerType = GAME_CONFIG.WORKER_TYPES.find(w => w.level === level);
+                const severance = Math.floor(workerType.cost * 0.3);
+                this.currentGold -= severance;
+                
+                showNotification(`노동자 해고. 위로금: ${formatNumber(severance)} 골드`, 'info');
+                return true;
+            }
+            
+            buyShip(shipType, captainName) {
+                const ship = GAME_CONFIG.SHIP_TYPES.find(s => s.type === shipType);
+                const captain = GAME_CONFIG.CAPTAIN_TYPES.find(c => c.name === captainName);
+                
+                if (!ship || !captain) return false;
+                
+                const shipCost = ship.capacity * 100;
+                
+                if (this.currentGold < shipCost) {
+                    showNotification('자금이 부족합니다!', 'danger');
+                    return false;
+                }
+                
+                this.currentGold -= shipCost;
+                
+                this.ships.push({
+                    ship_type: ship.type,
+                    capacity: ship.capacity,
+                    speed_days: ship.speed_days,
+                    commission_rate: ship.commission,
+                    status: 'docked',
+                    ore_loaded: 0,
+                    captain_name: captain.name,
+                    loss_rate: captain.loss_rate,
+                    departure_date: 0,
+                    arrival_date: 0
+                });
+                
+                showNotification(`${ship.type} 구매 완료! (선장: ${captain.name})`, 'success');
+                return true;
+            }
+            
+            loadAndSendShip(shipIndex, oreAmount) {
+                const ship = this.ships[shipIndex];
+                if (!ship) return false;
+                
+                if (ship.status !== 'docked') {
+                    showNotification('이미 항해 중인 배입니다!', 'warning');
+                    return false;
+                }
+                
+                if (oreAmount > ship.capacity) {
+                    showNotification('적재량을 초과했습니다!', 'warning');
+                    return false;
+                }
+                
+                if (oreAmount > this.oreStorage) {
+                    showNotification('보유한 광물이 부족합니다!', 'warning');
+                    return false;
+                }
+                
+                ship.ore_loaded = oreAmount;
+                this.oreStorage -= oreAmount;
+                ship.status = 'sailing';
+                ship.departure_date = this.gameDay;
+                ship.arrival_date = this.gameDay + ship.speed_days;
+                
+                showNotification(`${ship.ship_type} 출발! ${ship.speed_days}일 후 도착 예정`, 'info');
+                return true;
+            }
+        }
+
+        // ========== 전역 변수 ==========
+        let gameState = null;
+
+        // ========== 유틸리티 함수 ==========
+        function formatNumber(num) {
+            return new Intl.NumberFormat('ko-KR').format(num);
+        }
+
+        function showNotification(message, type = 'info') {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
+            alertDiv.style.position = 'fixed';
+            alertDiv.style.top = '20px';
+            alertDiv.style.right = '20px';
+            alertDiv.style.zIndex = '9999';
+            alertDiv.style.minWidth = '300px';
+            alertDiv.style.animation = 'slideIn 0.3s ease-out';
+            
+            document.body.appendChild(alertDiv);
+            
+            setTimeout(() => {
+                alertDiv.style.animation = 'slideOut 0.3s ease-out';
+                setTimeout(() => alertDiv.remove(), 300);
+            }, 3000);
+        }
+
+        // ========== 게임 제어 함수 ==========
+        function startGame() {
+            const playerName = document.getElementById('playerName').value.trim();
+            const targetGold = parseInt(document.getElementById('targetGold').value);
+            
+            console.log('게임 시작:', playerName, targetGold);
+            
+            if (!playerName) {
+                showNotification('플레이어 이름을 입력하세요!', 'warning');
+                return;
+            }
+            
+            if (targetGold < 1000000) {
+                showNotification('목표 금액은 최소 1,000,000 골드 이상이어야 합니다!', 'warning');
+                return;
+            }
+            
+            gameState = new GameState();
+            gameState.playerName = playerName;
+            gameState.targetGold = targetGold;
+            
+            console.log('게임 상태 생성 완료:', gameState);
+            
+            // 화면 전환
+            const startScreen = document.getElementById('startScreen');
+            const gameScreen = document.getElementById('gameScreen');
+            
+            console.log('화면 전환 시작');
+            console.log('startScreen:', startScreen);
+            console.log('gameScreen:', gameScreen);
+            
+            startScreen.style.display = 'none';
+            gameScreen.style.display = 'block';
+            
+            console.log('화면 전환 완료');
+            
+            updateUI();
+            console.log('UI 업데이트 완료');
+        }
+
+        function goToStart() {
+            if (confirm('게임을 처음부터 다시 시작하시겠습니까?')) {
+                document.getElementById('startScreen').style.display = 'block';
+                document.getElementById('gameScreen').style.display = 'none';
+                document.getElementById('resultScreen').style.display = 'none';
+                gameState = null;
+            }
+        }
+
+        function advanceTime(days) {
+            for (let i = 0; i < days; i++) {
+                gameState.advanceDay();
+                
+                if (gameState.gameStatus !== 'playing') {
+                    showResult();
+                    return;
+                }
+            }
+            
+            updateUI();
+            showNotification(`${days}일이 경과했습니다.`, 'info');
+        }
+
+        function showSection(sectionName) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.btn-nav').forEach(b => b.classList.remove('active'));
+            
+            document.getElementById(sectionName + 'Section').classList.add('active');
+            event.target.classList.add('active');
+            
+            updateUI();
+        }
+
+        function updateUI() {
+            if (!gameState) return;
+            
+            document.getElementById('displayPlayerName').textContent = gameState.playerName;
+            document.getElementById('currentGold').textContent = formatNumber(gameState.currentGold);
+            document.getElementById('targetGoldDisplay').textContent = formatNumber(gameState.targetGold);
+            document.getElementById('gameMonth').textContent = gameState.gameMonth;
+            document.getElementById('oreStorage').textContent = formatNumber(gameState.oreStorage);
+            document.getElementById('dailyMining').textContent = formatNumber(gameState.getDailyMining());
+            document.getElementById('monthlyMaintenance').textContent = formatNumber(gameState.getMonthlyMaintenance());
+            
+            const progress = Math.min((gameState.currentGold / gameState.targetGold) * 100, 100);
+            const progressBar = document.getElementById('progressBar');
+            progressBar.style.width = progress + '%';
+            progressBar.textContent = progress.toFixed(1) + '%';
+            
+            const alertContainer = document.getElementById('alertContainer');
+            alertContainer.innerHTML = '';
+            
+            // 게임 종료 조건 체크
+            if (gameState.gameStatus === 'success') {
+                showNotification('🎉 목표 달성! 축하합니다!', 'success');
+                setTimeout(() => {
+                    showResult();
+                }, 1500);
+                return;
+            } else if (gameState.gameStatus === 'failed') {
+                showNotification('💸 파산! 게임 오버', 'danger');
+                setTimeout(() => {
+                    showResult();
+                }, 1500);
+                return;
+            }
+            
+            if (gameState.currentGold < gameState.getMonthlyMaintenance()) {
+                alertContainer.innerHTML = '<div class="alert alert-danger">⚠️ 경고: 다음 달 유지비를 낼 수 없습니다! 파산 위기!</div>';
+            } else if (gameState.currentGold < gameState.getMonthlyMaintenance() * 3) {
+                alertContainer.innerHTML = '<div class="alert alert-warning">⚠️ 주의: 자금이 부족합니다. 선박을 보내 수익을 확보하세요!</div>';
+            }
+            
+            updateWorkerList();
+            updateShipList();
+        }
+
+        function updateWorkerList() {
+            const workerList = document.getElementById('workerList');
+            if (gameState.workers.length === 0) {
+                workerList.innerHTML = '<p class="alert alert-info">고용된 노동자가 없습니다.</p>';
+                return;
+            }
+            
+            workerList.innerHTML = '';
+            gameState.workers.forEach(worker => {
+                const div = document.createElement('div');
+                div.className = 'worker-item';
+                div.innerHTML = `
+                    <h4>${worker.worker_name} (레벨 ${worker.worker_level})</h4>
+                    <div class="worker-info">
+                        <p>👷 고용 인원: ${worker.count}명</p>
+                        <p>⛏️ 일일 채굴량: ${formatNumber(worker.mining_rate * worker.count)} 광물</p>
+                        <p>💰 월 유지비: ${formatNumber(worker.maintenance_cost * worker.count)} 골드</p>
+                    </div>
+                    <div class="worker-actions">
+                        <button class="btn-small btn-success" onclick="hireWorkerUI(${worker.worker_level})">+1 고용</button>
+                        <button class="btn-small btn-danger" onclick="fireWorkerUI(${worker.worker_level})">-1 해고</button>
+                    </div>
+                `;
+                workerList.appendChild(div);
+            });
+        }
+
+        function updateShipList() {
+            const shipList = document.getElementById('shipList');
+            if (gameState.ships.length === 0) {
+                shipList.innerHTML = '<p class="alert alert-info">보유한 선박이 없습니다.</p>';
+                return;
+            }
+            
+            shipList.innerHTML = '';
+            gameState.ships.forEach((ship, index) => {
+                const div = document.createElement('div');
+                div.className = 'ship-item';
+                
+                let statusHTML = '';
+                if (ship.status === 'docked') {
+                    statusHTML = `
+                        <p style="color: green;">⚓ 정박 중</p>
+                        <div class="form-group">
+                            <label>적재량 (최대: ${formatNumber(ship.capacity)})</label>
+                            <input type="number" id="oreAmount${index}" min="0" max="${ship.capacity}" value="${Math.min(gameState.oreStorage, ship.capacity)}">
+                        </div>
+                        <button class="btn-small btn-info" onclick="sendShip(${index})">🚢 출항</button>
+                    `;
+                } else {
+                    const daysLeft = ship.arrival_date - gameState.gameDay;
+                    statusHTML = `
+                        <p style="color: orange;">🌊 항해 중 (${daysLeft}일 남음)</p>
+                        <p>적재량: ${formatNumber(ship.ore_loaded)} 광물</p>
+                    `;
+                }
+                
+                div.innerHTML = `
+                    <h4>${ship.ship_type}</h4>
+                    <div class="ship-info">
+                        <p>👨‍✈️ 선장: ${ship.captain_name}</p>
+                        <p>📦 적재량: ${formatNumber(ship.capacity)} 광물</p>
+                        <p>⏱️ 왕복: ${ship.speed_days}일</p>
+                        <p>💵 수수료: ${ship.commission_rate}%</p>
+                        ${statusHTML}
+                    </div>
+                `;
+                shipList.appendChild(div);
+            });
+        }
+
+        function showHireWorkerModal() {
+            const levels = GAME_CONFIG.WORKER_TYPES.map(w => 
+                `${w.level}. ${w.name} - 채굴: ${w.mining_rate}/일, 비용: ${formatNumber(w.cost)}G`
+            ).join('\n');
+            
+            const choice = prompt(`노동자를 고용하세요:\n\n${levels}\n\n레벨 번호를 입력하세요 (1-5):`);
+            
+            if (choice) {
+                const level = parseInt(choice);
+                if (level >= 1 && level <= 5) {
+                    hireWorkerUI(level);
+                }
+            }
+        }
+
+        function hireWorkerUI(level) {
+            if (gameState.hireWorker(level)) {
+                updateUI();
+            }
+        }
+
+        function fireWorkerUI(level) {
+            if (gameState.fireWorker(level)) {
+                updateUI();
+            }
+        }
+
+        function showBuyShipModal() {
+            const ships = GAME_CONFIG.SHIP_TYPES.map((s, i) => 
+                `${i + 1}. ${s.type} - 용량: ${s.capacity}, 속도: ${s.speed_days}일, 수수료: ${s.commission}%, 가격: ${formatNumber(s.capacity * 100)}G`
+            ).join('\n');
+            
+            const shipChoice = prompt(`선박을 선택하세요:\n\n${ships}\n\n번호를 입력하세요 (1-5):`);
+            if (!shipChoice) return;
+            
+            const shipIndex = parseInt(shipChoice) - 1;
+            if (shipIndex < 0 || shipIndex >= GAME_CONFIG.SHIP_TYPES.length) return;
+            
+            const captains = GAME_CONFIG.CAPTAIN_TYPES.map((c, i) => 
+                `${i + 1}. ${c.name} - 도덕: ${c.morality}, 행운: ${c.luck}, 손실률: ${c.loss_rate}%`
+            ).join('\n');
+            
+            const captainChoice = prompt(`선장을 선택하세요:\n\n${captains}\n\n번호를 입력하세요 (1-5):`);
+            if (!captainChoice) return;
+            
+            const captainIndex = parseInt(captainChoice) - 1;
+            if (captainIndex < 0 || captainIndex >= GAME_CONFIG.CAPTAIN_TYPES.length) return;
+            
+            const ship = GAME_CONFIG.SHIP_TYPES[shipIndex];
+            const captain = GAME_CONFIG.CAPTAIN_TYPES[captainIndex];
+            
+            if (gameState.buyShip(ship.type, captain.name)) {
+                updateUI();
+            }
+        }
+
+        function sendShip(shipIndex) {
+            const oreAmount = parseInt(document.getElementById(`oreAmount${shipIndex}`).value);
+            
+            if (isNaN(oreAmount) || oreAmount <= 0) {
+                showNotification('유효한 적재량을 입력하세요!', 'warning');
+                return;
+            }
+            
+            if (gameState.loadAndSendShip(shipIndex, oreAmount)) {
+                updateUI();
+            }
+        }
+
+        function showResult() {
+            document.getElementById('gameScreen').style.display = 'none';
+            document.getElementById('resultScreen').style.display = 'block';
+            
+            const resultContent = document.getElementById('resultContent');
+            const progressPercent = ((gameState.currentGold / gameState.targetGold) * 100).toFixed(1);
+            
+            if (gameState.gameStatus === 'success') {
+                document.getElementById('resultScreen').className = 'result-screen success';
+                resultContent.innerHTML = `
+                    <h1>🎉 축하합니다!</h1>
+                    <h2>목표 금액 달성 성공!</h2>
+                    
+                    <div class="result-stats">
+                        <h2>📊 최종 통계</h2>
+                        <p><strong>플레이어:</strong> ${gameState.playerName}</p>
+                        <p><strong>최종 자금:</strong> ${formatNumber(gameState.currentGold)} 골드</p>
+                        <p><strong>목표 금액:</strong> ${formatNumber(gameState.targetGold)} 골드</p>
+                        <p><strong>달성률:</strong> ${progressPercent}%</p>
+                        <p><strong>경과 월수:</strong> ${gameState.gameMonth}개월</p>
+                    </div>
+                    
+                    <div class="alert alert-success">
+                        <strong>🏆 승리!</strong><br>
+                        당신은 훌륭한 광산 경영자입니다! ${gameState.gameMonth}개월 만에 목표를 달성했습니다.
+                    </div>
+                    
+                    <button class="btn btn-primary" onclick="goToStart()">🔄 다시 도전</button>
+                `;
+            } else {
+                document.getElementById('resultScreen').className = 'result-screen failed';
+                resultContent.innerHTML = `
+                    <h1>💔 파산!</h1>
+                    <h2>게임 오버</h2>
+                    
+                    <div class="result-stats">
+                        <h2>📊 최종 통계</h2>
+                        <p><strong>플레이어:</strong> ${gameState.playerName}</p>
+                        <p><strong>최종 자금:</strong> ${formatNumber(gameState.currentGold)} 골드</p>
+                        <p><strong>목표 금액:</strong> ${formatNumber(gameState.targetGold)} 골드</p>
+                        <p><strong>달성률:</strong> ${progressPercent}%</p>
+                        <p><strong>생존 월수:</strong> ${gameState.gameMonth}개월</p>
+                    </div>
+                    
+                    <div class="alert alert-danger">
+                        <strong>💸 파산!</strong><br>
+                        운영 자금이 바닥났습니다. 유지비와 수익의 균형을 더 잘 맞춰야 합니다.
+                    </div>
+                    
+                    <button class="btn btn-primary" onclick="goToStart()">🔄 다시 도전</button>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>
