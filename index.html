@@ -506,6 +506,10 @@
                         <div class="stat-label">📅 경과 월수</div>
                         <div class="stat-value"><span id="gameMonth">0</span> 개월</div>
                     </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); color: #333;">
+                        <div class="stat-label">⏰ 경과 일수</div>
+                        <div class="stat-value"><span id="gameDays">0</span> 일</div>
+                    </div>
                 </div>
                 
                 <!-- 진행률 바 -->
@@ -664,7 +668,7 @@
             advanceMonth() {
                 this.gameMonth++;
                 const maintenance = this.getMonthlyMaintenance();
-                this.currentGold -= maintenance;
+                this.currentGold = Math.floor(this.currentGold - maintenance);
                 
                 if (this.currentGold <= 0) {
                     this.gameStatus = 'failed';
@@ -681,21 +685,21 @@
             
             processShipArrival(ship) {
                 const lossRate = ship.loss_rate / 100;
-                const actualOre = ship.ore_loaded * (1 - lossRate);
+                const actualOre = Math.floor(ship.ore_loaded * (1 - lossRate));
                 const priceVariation = 1 + (Math.random() - 0.5) * 2 * GAME_CONFIG.PRICE_VARIANCE;
                 const orePrice = GAME_CONFIG.ORE_BASE_PRICE * priceVariation;
-                const grossRevenue = actualOre * orePrice;
-                const commission = grossRevenue * (ship.commission_rate / 100);
+                const grossRevenue = Math.floor(actualOre * orePrice);
+                const commission = Math.floor(grossRevenue * (ship.commission_rate / 100));
                 const netRevenue = grossRevenue - commission;
                 
-                this.currentGold += netRevenue;
+                this.currentGold = Math.floor(this.currentGold + netRevenue);
                 
                 ship.status = 'docked';
                 ship.ore_loaded = 0;
                 ship.departure_date = 0;
                 ship.arrival_date = 0;
                 
-                showNotification(`🚢 ${ship.ship_type} 도착! 순수익: ${formatNumber(Math.floor(netRevenue))} 골드`, 'success');
+                showNotification(`🚢 ${ship.ship_type} 도착! 순수익: ${formatNumber(netRevenue)} 골드`, 'success');
                 
                 // 승리 조건 체크
                 if (this.currentGold >= this.targetGold) {
@@ -726,7 +730,7 @@
                     });
                 }
                 
-                this.currentGold -= workerType.cost;
+                this.currentGold = Math.floor(this.currentGold - workerType.cost);
                 showNotification(`${workerType.name} 고용 완료!`, 'success');
                 return true;
             }
@@ -743,7 +747,7 @@
                 
                 const workerType = GAME_CONFIG.WORKER_TYPES.find(w => w.level === level);
                 const severance = Math.floor(workerType.cost * 0.3);
-                this.currentGold -= severance;
+                this.currentGold = Math.floor(this.currentGold - severance);
                 
                 showNotification(`노동자 해고. 위로금: ${formatNumber(severance)} 골드`, 'info');
                 return true;
@@ -762,7 +766,7 @@
                     return false;
                 }
                 
-                this.currentGold -= shipCost;
+                this.currentGold = Math.floor(this.currentGold - shipCost);
                 
                 this.ships.push({
                     ship_type: ship.type,
@@ -816,7 +820,7 @@
 
         // ========== 유틸리티 함수 ==========
         function formatNumber(num) {
-            return new Intl.NumberFormat('ko-KR').format(num);
+            return new Intl.NumberFormat('ko-KR').format(Math.floor(num));
         }
 
         function showNotification(message, type = 'info') {
@@ -918,6 +922,7 @@
             document.getElementById('currentGold').textContent = formatNumber(gameState.currentGold);
             document.getElementById('targetGoldDisplay').textContent = formatNumber(gameState.targetGold);
             document.getElementById('gameMonth').textContent = gameState.gameMonth;
+            document.getElementById('gameDays').textContent = gameState.gameDay;
             document.getElementById('oreStorage').textContent = formatNumber(gameState.oreStorage);
             document.getElementById('dailyMining').textContent = formatNumber(gameState.getDailyMining());
             document.getElementById('monthlyMaintenance').textContent = formatNumber(gameState.getMonthlyMaintenance());
